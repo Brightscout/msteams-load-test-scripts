@@ -83,7 +83,7 @@ const tokenCalls = async () => {
         const usernamePasswordRequest = {
             scopes: ["user.read"],
             username: "manoj@brightscoutdev.onmicrosoft.com", // Add your username here
-            password: "Azure@12345", // Add your password here
+            password: "", // Add your password here
         };
 
         pca.acquireTokenByUsernamePassword(usernamePasswordRequest).then((response) => {
