@@ -1,0 +1,22 @@
+{
+    "ConnectionConfiguration": {
+        "TenantId": "",
+        "ClientId": "",
+        "ClientSecret" : ""
+    },
+    "UsersConfiguration": [
+        {
+            "Username": "",
+            "Password": ""
+        },
+        {
+            "Username": "",
+            "Password": ""
+        }
+    ],
+    "ChannelsConfiguration": [
+        {
+            
+        }
+    ]
+}
