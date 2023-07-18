@@ -4,7 +4,6 @@ type Config struct {
 	ConnectionConfiguration ConnectionConfiguration
 	UsersConfiguration      []UsersConfiguration
 	ChannelsConfiguration   []ChannelsConfiguration
-	PostsConfiguration      PostsConfiguration
 }
 
 type ConnectionConfiguration struct {
@@ -23,11 +22,4 @@ type ChannelsConfiguration struct {
 	ChannelID          string
 	ChannelDisplayName string
 	Type               string
-}
-
-type PostsConfiguration struct {
-	Count         int
-	MaxWordsCount int
-	MaxWordLength int
-	Duration      string
 }

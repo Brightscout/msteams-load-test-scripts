@@ -40,6 +40,8 @@ func CreateChannels(config *serializers.Config, logger *zap.Logger) error {
 		if idx == 0 {
 			roles = append(roles, "owner")
 		}
+		odataType := "#microsoft.graph.aadUserConversationMember"
+		conversationMember.SetOdataType(&odataType)
 		conversationMember.SetRoles(roles)
 		additionalData := map[string]interface{}{
 			"user@odata.bind": fmt.Sprintf("https://graph.microsoft.com/v1.0/users('%s')", user.ID),
@@ -59,14 +61,15 @@ func CreateChannels(config *serializers.Config, logger *zap.Logger) error {
 
 	var storedChannels []*serializers.StoredChannel
 	for _, channelConfig := range config.ChannelsConfiguration {
-		channel, newCreated, err := GetOrCreateChannel(client, &channelConfig, members)
+		channel, newCreated, err := getOrCreateChannel(client, &channelConfig, members)
 		if err != nil {
 			logger.Error("error in getting or creating channel", zap.String("Channel", channelConfig.ChannelDisplayName), zap.Error(err))
 			continue
 		}
 
 		storedChannels = append(storedChannels, &serializers.StoredChannel{
-			ID: *channel.GetId(),
+			ID:     *channel.GetId(),
+			TeamID: channelConfig.TeamID,
 		})
 
 		if !newCreated {
@@ -100,7 +103,7 @@ func CreateChannels(config *serializers.Config, logger *zap.Logger) error {
 	return nil
 }
 
-func GetOrCreateChannel(client *msgraphsdkgo.GraphServiceClient, channelConfig *serializers.ChannelsConfiguration, members []models.ConversationMemberable) (channel models.Channelable, newCreated bool, err error) {
+func getOrCreateChannel(client *msgraphsdkgo.GraphServiceClient, channelConfig *serializers.ChannelsConfiguration, members []models.ConversationMemberable) (channel models.Channelable, newCreated bool, err error) {
 	teamID, channelID, channelDisplayName := channelConfig.TeamID, channelConfig.ChannelID, channelConfig.ChannelDisplayName
 	if channelID != "" {
 		channel, err = client.Teams().ByTeamId(teamID).Channels().ByChannelId(channelID).Get(context.Background(), nil)
