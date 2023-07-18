@@ -1,0 +1,47 @@
+{
+    "ConnectionConfiguration": {
+        "TenantID": "",
+        "ClientID": "",      
+        "ClientSecret": ""
+    },
+    "UsersConfiguration": [
+        {
+            "Email": "",
+            "Password": ""
+        },
+        {
+            "Email": "",
+            "Password": ""
+        },
+        {
+            "Email": "",
+            "Password": ""
+        }
+    ],
+    "ChannelsConfiguration": [
+        {
+            "TeamID": "",
+            "ChannelID": "",
+            "ChannelDisplayName": "Load Test 1",
+            "Type": "P"
+        },
+        {
+            "TeamID": "",
+            "ChannelID": "",
+            "ChannelDisplayName": "Load Test 2",
+            "Type": "O"
+        },
+        {
+            "TeamID": "",
+            "ChannelID": "",
+            "ChannelDisplayName": "Load Test 3",
+            "Type": "P"
+        }
+    ],
+    "PostsConfiguration": {
+        "Count": 100,
+        "MaxWordsCount": 10,
+        "MaxWordLength": 10,
+        "Duration": "30s"
+    }
+}
