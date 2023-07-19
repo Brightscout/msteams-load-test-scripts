@@ -22,15 +22,29 @@ func main() {
 		return
 	}
 
-	// TODO: Add config validation
+	if err := config.IsConnectionConfigurationValid(); err != nil {
+		logger.Error("Error in validating the connection configuration", zap.Error(err))
+		return
+	}
+
 	args := os.Args
 	if len(args) > 1 {
 		switch args[1] {
 		case constants.ClearStore:
 			err = scripts.ClearStore()
 		case constants.InitUsers:
+			if err := config.IsUsersConfigurationValid(); err != nil {
+				logger.Error("Error in validating the user configuration", zap.Error(err))
+				break
+			}
+
 			err = scripts.InitUsers(config, logger)
 		case constants.CreateChannels:
+			if err := config.IsChannelsConfigurationValid(); err != nil {
+				logger.Error("Error in validating the channel configuration", zap.Error(err))
+				break
+			}
+
 			err = scripts.CreateChannels(config, logger)
 		case constants.CreateChats:
 			err = scripts.CreateChats(config, logger)

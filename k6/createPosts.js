@@ -102,6 +102,10 @@ export default function() {
 
     check(resp, {
         'Post status is 201': (r) => resp.status === 201,
-        'Post Content-Type header': (r) => resp.headers['Content-Type'].includes('application/json'),
-      });
+        'Post Content-Type header': (r) => {
+            if(resp.headers['Content-Type']) {
+                return resp.headers['Content-Type'].includes('application/json')
+            }
+        }
+    });
 }
