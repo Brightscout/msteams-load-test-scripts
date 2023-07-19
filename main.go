@@ -32,6 +32,8 @@ func main() {
 			err = scripts.InitUsers(config, logger)
 		case constants.CreateChannels:
 			err = scripts.CreateChannels(config, logger)
+		case constants.CreateChats:
+			err = scripts.CreateChats(config, logger)
 		default:
 			err = errors.New("invalid arguments")
 		}

@@ -39,9 +39,15 @@
         }
     ],
     "PostsConfiguration": {
-        "Count": 100,
         "MaxWordsCount": 10,
-        "MaxWordLength": 10,
-        "Duration": "30s"
+        "MaxWordLength": 10
+    },
+    "LoadTestConfiguration": {
+        "VirtualUserCount": 50,
+        "Duration": "30s",
+        "RPS": true,
+        "TimeUnit": "1s",
+        "Executor": "constant-arrival-rate",
+        "Rate": 30
     }
 }
