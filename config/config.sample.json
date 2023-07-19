@@ -1,0 +1,47 @@
+{
+    "ConnectionConfiguration": {
+        "TenantID": "mockTenantID",
+        "ClientID": "mockClientID",      
+        "ClientSecret": "mockClientSecret"
+    },
+    "UsersConfiguration": [
+        {
+            "Email": "user1@gmail.com",
+            "Password": "password-1"
+        },
+        {
+            "Email": "user2@gmail.com",
+            "Password": "password-2"
+        },
+        {
+            "Email": "user3@gmail.com",
+            "Password": "password-3"
+        }
+    ],
+    "ChannelsConfiguration": [
+        {
+            "TeamID": "mockTeamID",
+            "ChannelID": "mockChannelID",
+            "ChannelDisplayName": "Load Test 1",
+            "Type": "P"
+        },
+        {
+            "TeamID": "mockTeamID",
+            "ChannelID": "",
+            "ChannelDisplayName": "Load Test 2",
+            "Type": "O"
+        },
+        {
+            "TeamID": "mockTeamID",
+            "ChannelID": "",
+            "ChannelDisplayName": "Load Test 3",
+            "Type": "P"
+        }
+    ],
+    "PostsConfiguration": {
+        "Count": 100,
+        "MaxWordsCount": 10,
+        "MaxWordLength": 10,
+        "Duration": "30s"
+    }
+}
