@@ -9,6 +9,7 @@ import (
 	"github.com/Brightscout/msteams-load-test-scripts/utils"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/users"
 	"go.uber.org/zap"
 )
 
@@ -29,18 +30,18 @@ func CreateChats(config *serializers.Config, logger *zap.Logger) error {
 	}
 
 	if len(store.Users) >= constants.MinUsersForDM {
-		newDM, err := createChatForUsers(client, []string{store.Users[0].ID, store.Users[1].ID})
+		newDMID, err := getOrCreateChatForUsers(client, []string{store.Users[0].ID, store.Users[1].ID})
 		if err != nil {
 			logger.Error("unable to create the DM", zap.Error(err))
 		} else {
 			store.DM = &serializers.StoredChat{
-				ID: *newDM.GetId(),
+				ID: newDMID,
 			}
 		}
 	}
 
 	if len(store.Users) >= constants.MinUsersForGM {
-		newGM, err := createChatForUsers(client, []string{
+		newGMID, err := getOrCreateChatForUsers(client, []string{
 			store.Users[0].ID,
 			store.Users[1].ID,
 			store.Users[2].ID,
@@ -49,7 +50,7 @@ func CreateChats(config *serializers.Config, logger *zap.Logger) error {
 			logger.Error("unable to create the GM", zap.Error(err))
 		} else {
 			store.GM = &serializers.StoredChat{
-				ID: *newGM.GetId(),
+				ID: newGMID,
 			}
 		}
 	}
@@ -63,14 +64,57 @@ func CreateChats(config *serializers.Config, logger *zap.Logger) error {
 	return nil
 }
 
-func createChatForUsers(client *msgraphsdkgo.GraphServiceClient, usersIDs []string) (models.Chatable, error) {
-	chatType := models.GROUP_CHATTYPE
-	if len(usersIDs) == 2 {
-		chatType = models.ONEONONE_CHATTYPE
+func getOrCreateChatForUsers(client *msgraphsdkgo.GraphServiceClient, userIDs []string) (string, error) {
+	if len(userIDs) == 2 {
+		return createChatForUsers(client, userIDs, models.ONEONONE_CHATTYPE)
 	}
 
-	members := make([]models.ConversationMemberable, len(usersIDs))
-	for idx, userID := range usersIDs {
+	chatID, err := getChatForUsers(client, userIDs)
+	if err == nil && chatID != "" {
+		return chatID, nil
+	}
+
+	return createChatForUsers(client, userIDs, models.GROUP_CHATTYPE)
+}
+
+func getChatForUsers(client *msgraphsdkgo.GraphServiceClient, userIDs []string) (string, error) {
+	requestParameters := &users.ItemChatsRequestBuilderGetQueryParameters{
+		Select: []string{"members", "id"},
+		Expand: []string{"members"},
+	}
+	configuration := &users.ItemChatsRequestBuilderGetRequestConfiguration{
+		QueryParameters: requestParameters,
+	}
+
+	res, err := client.Users().ByUserId(userIDs[0]).Chats().Get(context.Background(), configuration)
+	if err != nil {
+		return "", utils.NormalizeGraphAPIError(err)
+	}
+
+	for _, c := range res.GetValue() {
+		if len(c.GetMembers()) == len(userIDs) {
+			matches := map[string]bool{}
+			for _, m := range c.GetMembers() {
+				for _, u := range userIDs {
+					userID, err2 := m.GetBackingStore().Get("userId")
+					if err2 == nil && userID != nil && *(userID.(*string)) == u {
+						matches[u] = true
+						break
+					}
+				}
+			}
+			if len(matches) == len(userIDs) {
+				return *c.GetId(), nil
+			}
+		}
+	}
+
+	return "", nil
+}
+
+func createChatForUsers(client *msgraphsdkgo.GraphServiceClient, userIDs []string, chatType models.ChatType) (string, error) {
+	members := make([]models.ConversationMemberable, len(userIDs))
+	for idx, userID := range userIDs {
 		conversationMember := models.NewConversationMember()
 		odataType := "#microsoft.graph.aadUserConversationMember"
 		conversationMember.SetOdataType(&odataType)
@@ -86,8 +130,8 @@ func createChatForUsers(client *msgraphsdkgo.GraphServiceClient, usersIDs []stri
 	chatRequestBody.SetMembers(members)
 	newChat, err := client.Chats().Post(context.Background(), chatRequestBody, nil)
 	if err != nil {
-		return nil, utils.NormalizeGraphAPIError(err)
+		return "", utils.NormalizeGraphAPIError(err)
 	}
 
-	return newChat, nil
+	return *newChat.GetId(), nil
 }
