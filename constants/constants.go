@@ -18,3 +18,5 @@ const (
 	MinUsersForDM = 2
 	MinUsersForGM = 3
 )
+
+var DefaultOAuthScopes = []string{"https://graph.microsoft.com/.default"}

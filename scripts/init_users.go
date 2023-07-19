@@ -7,6 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Brightscout/msteams-load-test-scripts/constants"
 	"github.com/Brightscout/msteams-load-test-scripts/serializers"
 	"github.com/Brightscout/msteams-load-test-scripts/utils"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
@@ -32,27 +33,27 @@ func InitUsers(config *serializers.Config, logger *zap.Logger) error {
 			},
 		)
 		if err != nil {
-			logger.Error("Unable to create creds using username/password", zap.String("user", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
+			logger.Error("Unable to create creds using username/password", zap.String("User", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
 			continue
 		}
 
 		token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{
-			Scopes: []string{"https://graph.microsoft.com/.default"},
+			Scopes: constants.DefaultOAuthScopes,
 		})
 		if err != nil {
-			logger.Error("Unable to get token", zap.String("user", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
+			logger.Error("Unable to get token", zap.String("User", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
 			continue
 		}
 
-		client, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{"https://graph.microsoft.com/.default"})
+		client, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, constants.DefaultOAuthScopes)
 		if err != nil {
-			logger.Error("Unable to create client", zap.String("user", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
+			logger.Error("Unable to create client", zap.String("User", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
 			continue
 		}
 
 		user, err := client.Me().Get(context.Background(), nil)
 		if err != nil {
-			logger.Error("Unable to get user info", zap.String("user", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
+			logger.Error("Unable to get user info", zap.String("User", userConfig.Email), zap.Error(utils.NormalizeGraphAPIError(err)))
 			continue
 		}
 

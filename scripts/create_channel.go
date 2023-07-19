@@ -16,7 +16,7 @@ import (
 func CreateChannels(config *serializers.Config, logger *zap.Logger) error {
 	client, err := GetAppClient(&config.ConnectionConfiguration)
 	if err != nil {
-		logger.Error("unable to get client", zap.String("error", err.Error()))
+		logger.Error("unable to get client", zap.Error(err))
 		return err
 	}
 
@@ -61,7 +61,7 @@ func CreateChannels(config *serializers.Config, logger *zap.Logger) error {
 	for _, channelConfig := range config.ChannelsConfiguration {
 		channel, newCreated, err := GetOrCreateChannel(client, &channelConfig, members)
 		if err != nil {
-			logger.Error("error in getting or creating channel", zap.String("channel", channelConfig.ChannelDisplayName), zap.Error(err))
+			logger.Error("error in getting or creating channel", zap.String("Channel", channelConfig.ChannelDisplayName), zap.Error(err))
 			continue
 		}
 

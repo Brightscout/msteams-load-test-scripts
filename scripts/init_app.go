@@ -6,6 +6,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Brightscout/msteams-load-test-scripts/constants"
 	"github.com/Brightscout/msteams-load-test-scripts/serializers"
 	"github.com/Brightscout/msteams-load-test-scripts/utils"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
@@ -30,7 +31,7 @@ func GetAppClient(connConfig *serializers.ConnectionConfiguration) (*msgraphsdk.
 		return nil, utils.NormalizeGraphAPIError(err)
 	}
 
-	client, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{"https://graph.microsoft.com/.default"})
+	client, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, constants.DefaultOAuthScopes)
 	if err != nil {
 		return nil, utils.NormalizeGraphAPIError(err)
 	}
