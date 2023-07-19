@@ -58,7 +58,7 @@ Set this value to `true` to use the request per second configuration.
 Period of time to apply the rate value.
 
 ### Executor: *string*
-Types of executors to apply for the request rate. Available executors are: `ramping-arrival-rate` and `constant-arrival-rate`.
+Types of executors to apply for the request rate. Available executor is: `constant-arrival-rate`.
 
 ### Rate: *int*
 Number of iterations to start during each time unit period.

@@ -1,6 +1,6 @@
 # MS Teams load test scripts
 
-MS Teams load-test-scripts provides a set of scripts written in [Go](https://golang.org/) and [JS](https://developer.mozilla.org/en-US/docs/Web/JavaScript) to help profiling MS Teams under heavy load, simulating real-world usage of a server installation at scale.
+MS Teams load-test-scripts provides a set of scripts written in [Go](https://golang.org/) and [JS](https://developer.mozilla.org/en-US/docs/Web/JavaScript) to help in profiling MS Teams under heavy load, simulating real-world usage of a server installation at scale.
 
 ## Setup
 
@@ -20,6 +20,8 @@ Make sure you have the following components installed:
     git clone https://github.com/Brightscout/msteams-load-test-scripts.git
     ```
 
+- Go to [Azure Setup](docs/azure_setup.md) to set up an OAuth application in Azure.
+
 ## How to use
 - Create a `config.json` file.
     - Run command to copy the sample `config.sample.json` file.
@@ -34,8 +36,6 @@ Make sure you have the following components installed:
 - Run the command `make init_users` to initialize users present in the config file.
 
 - Run the command `make create_channels` to create the new MS Teams channels and add the above users to them. 
-
-- Go to your Mattermost account and connect any Mattermost channel with these new MS Teams channels.
 
 - Run the command `make create_chats` to create MS Teams chats between the users.
 
