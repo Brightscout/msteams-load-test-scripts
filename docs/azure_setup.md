@@ -2,7 +2,7 @@
 
 ### Step 1: Create Load Test App in Azure
 
-1. Sign into [portal.azure.com](https://portal.azure.com) using an admin Azure account.
+1. Sign into [Azure portal](https://portal.azure.com) using an admin Azure account.
 2. Navigate to [App Registrations](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps)
 3. Click on **New registration** at the top of the page.
 
@@ -45,7 +45,6 @@
 - `Group.Create`
 - `Group.Read.All`
 - `Group.ReadWrite.All`
-- `Team.Create`
 - `Team.ReadBasic.All`
 - `TeamMember.ReadWrite.All`
 - `TeamMember.ReadWriteNonOwnerRole.All`
@@ -56,6 +55,6 @@
 
 15. Navigate to **Authentication** in the left pane.
 
-16. Scroll down below to **Advanced settings** and **Allow public client flows value** to `Yes`.
+16. Scroll down below to **Advanced settings** and change **Allow public client flows value** to `Yes`.
 
 ![image](https://github.com/Brightscout/msteams-load-test-scripts/assets/77336594/5a759c30-9f73-4570-b201-6a183a567691)
