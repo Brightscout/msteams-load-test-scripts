@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func CreateDMAndGMs(config *serializers.Config, logger *zap.Logger) error {
+func CreateChats(config *serializers.Config, logger *zap.Logger) error {
 	store, err := utils.LoadCreds()
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func CreateDMAndGMs(config *serializers.Config, logger *zap.Logger) error {
 
 	client, err := GetAppClient(&config.ConnectionConfiguration)
 	if err != nil {
-		logger.Error("unable to get client", zap.String("error", err.Error()))
+		logger.Error("unable to get client", zap.Error(err))
 		return err
 	}
 

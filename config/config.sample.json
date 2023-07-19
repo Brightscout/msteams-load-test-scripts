@@ -45,7 +45,7 @@
     "LoadTestConfiguration": {
         "VirtualUserCount": 50,
         "Duration": "30s",
-        "RPS": false,
+        "RPS": true,
         "TimeUnit": "1s",
         "Executor": "constant-arrival-rate",
         "Rate": 30
