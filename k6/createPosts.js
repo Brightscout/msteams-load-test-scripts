@@ -5,33 +5,36 @@ const config = JSON.parse(open('../config/config.json'));
 const creds = JSON.parse(open('../temp_store.json'));
 
 export var options = {};
-if (config.LoadTestConfiguration.RPS) {
+const {RPS, Executor, Duration, Rate, TimeUnit, VirtualUserCount, BatchSize} = config.LoadTestConfiguration;
+const {MaxWordsCount, MaxWordLength} = config.PostsConfiguration;
+
+if (RPS) {
     options = {
         discardResponseBodies: true,
         scenarios: {
             contacts: {
-                executor: config.LoadTestConfiguration.Executor,
-                duration: config.LoadTestConfiguration.Duration,
-                rate: config.LoadTestConfiguration.Rate,
-                timeUnit: config.LoadTestConfiguration.TimeUnit,
-                preAllocatedVUs: config.LoadTestConfiguration.VirtualUserCount,
+                executor: Executor,
+                duration: Duration,
+                rate: Rate,
+                timeUnit: TimeUnit,
+                preAllocatedVUs: VirtualUserCount,
             },
         }
     }
 } else {
     options = {
-        vus: config.LoadTestConfiguration.VirtualUserCount,
-        duration: config.LoadTestConfiguration.Duration,
+        vus: VirtualUserCount,
+        duration: Duration,
     }
 }
 
 export function setup() {
-	if (config.PostsConfiguration.MaxWordsCount <= 0) {
+	if (MaxWordsCount <= 0) {
         console.error("Error in validating the posts configuration:", "max word count should be greater than 0");
 		return;
 	}
 
-	if (config.PostsConfiguration.MaxWordLength <= 0) {
+	if (MaxWordLength <= 0) {
         console.error("Error in validating the posts configuration:", "max word length should be greater than 0");
 		return;
 	}
@@ -78,30 +81,42 @@ function getRandomChannel() {
 }
 
 export default function() {
-    const payload = JSON.stringify({
-        body: {
-          content: getRandomMessage(config.PostsConfiguration.MaxWordsCount, config.PostsConfiguration.MaxWordLength)
+    const requests = [];
+    for(let i = 0; i < BatchSize; i++) {
+        const channel = getRandomChannel();
+        let url;
+        if (typeof channel === "string") {
+            const chatId = channel;
+            url = `/chats/${chatId}/messages`;
+        } else {
+            const {id, team_id} = channel;
+            url = `/teams/${team_id}/channels/${id}/messages`;
         }
-      });
 
+        requests.push({
+            url,
+            method: "POST",
+            id: i,
+            body: {
+                body: {
+                    content: getRandomMessage(MaxWordsCount, MaxWordLength)
+                }
+            },
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+    }
+    const payload = JSON.stringify({requests});
+    const token = getRandomToken();
     const headers = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getRandomToken()}`,
+        Authorization: `Bearer ${token}`,
     }
 
-    const channel = getRandomChannel();
-    let resp;
-    if (typeof channel === "string") {
-        const chatId = channel;
-        resp = http.post(`https://graph.microsoft.com/v1.0/chats/${chatId}/messages`, payload, {headers});
-    } else {
-        const {id, team_id} = channel;
-        resp = http.post(`https://graph.microsoft.com/v1.0/teams/${team_id}/channels/${id}/messages`, payload, {headers});
-    }
-
-
+    const resp = http.post("https://graph.microsoft.com/v1.0/$batch", payload, {headers});
     check(resp, {
-        'Post status is 201': (r) => resp.status === 201,
+        'Post status is 200': (r) => resp.status === 200,
         'Post Content-Type header': (r) => {
             if(resp.headers['Content-Type']) {
                 return resp.headers['Content-Type'].includes('application/json')

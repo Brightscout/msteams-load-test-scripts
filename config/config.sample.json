@@ -48,6 +48,7 @@
         "RPS": true,
         "TimeUnit": "1s",
         "Executor": "constant-arrival-rate",
-        "Rate": 30
+        "Rate": 3,
+        "BatchSize": 5
     }
 }
