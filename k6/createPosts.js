@@ -1,5 +1,7 @@
 import {check} from 'k6'
 import http from 'k6/http';
+import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.3/index.js";
+import { SharedArray } from 'k6/data';
 
 const config = JSON.parse(open('../config/config.json'));
 const creds = JSON.parse(open('../temp_store.json'));
@@ -8,9 +10,15 @@ export var options = {};
 const {RPS, Executor, Duration, Rate, TimeUnit, VirtualUserCount, BatchSize} = config.LoadTestConfiguration;
 const {MaxWordsCount, MaxWordLength} = config.PostsConfiguration;
 
+// Temporary code
+const shared = new SharedArray('demo array', () => {
+    // const creds = JSON.parse(open('../temp_store.json'));
+    return [0, 0];
+})
+
 if (RPS) {
     options = {
-        discardResponseBodies: true,
+        discardResponseBodies: false,
         scenarios: {
             contacts: {
                 executor: Executor,
@@ -38,6 +46,11 @@ export function setup() {
         console.error("Error in validating the posts configuration:", "max word length should be greater than 0");
 		return;
 	}
+    
+    if (BatchSize <= 0 || BatchSize > 20) {
+        console.error("Error in validating the batch size:", "batch size should be between 1 and 20");
+        return;
+    }
 }
 
 function getRandomMessage(wordsCount, wordLength) {
@@ -80,6 +93,22 @@ function getRandomChannel() {
     return channels[(Math.floor(Math.random() * channels.length))];
 }
 
+// Temporary code
+export function handleSummary(data) {
+    data.metrics['no_of_posts_created'] = {
+        type: 'rate',
+        contains: "default",
+        values: {
+            fails: shared[0],
+            rate: 0,
+            passes: shared[1],
+        },
+    }
+    return {
+      'stdout': textSummary(data, {indent: '    ', enableColors: true})
+    };
+}
+
 export default function() {
     const requests = [];
     for(let i = 0; i < BatchSize; i++) {
@@ -89,8 +118,8 @@ export default function() {
             const chatId = channel;
             url = `/chats/${chatId}/messages`;
         } else {
-            const {id, team_id} = channel;
-            url = `/teams/${team_id}/channels/${id}/messages`;
+            const {id: channelId, team_id: teamId} = channel;
+            url = `/teams/${teamId}/channels/${channelId}/messages`;
         }
 
         requests.push({
@@ -107,20 +136,36 @@ export default function() {
             }
         })
     }
+
     const payload = JSON.stringify({requests});
-    const token = getRandomToken();
     const headers = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${getRandomToken()}`,
     }
 
     const resp = http.post("https://graph.microsoft.com/v1.0/$batch", payload, {headers});
     check(resp, {
-        'Post status is 200': (r) => resp.status === 200,
-        'Post Content-Type header': (r) => {
+        'Response status is 200': (r) => resp.status === 200,
+        'Response Content-Type header': (r) => {
             if(resp.headers['Content-Type']) {
                 return resp.headers['Content-Type'].includes('application/json')
             }
         }
     });
+
+    // TODO: Temporary code, fix or remove
+    const responses = resp.json("responses");
+    if(responses) {
+        for(let response of responses) {
+            if(response.status === 201) {
+                shared[0] = shared[0]+1;
+            } else {
+                shared[1] = shared[1]+1;
+            }
+        }
+    }
+    
+    
+    let countSucc = shared[1], countFail = shared[0];
+    console.info(`No. of posts created: ✔ ${countSucc}  ⨯ ${countFail}`);
 }
