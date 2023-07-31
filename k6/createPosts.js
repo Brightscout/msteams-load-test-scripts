@@ -1,7 +1,5 @@
 import {check} from 'k6'
 import http from 'k6/http';
-import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.3/index.js";
-import { SharedArray } from 'k6/data';
 
 const config = JSON.parse(open('../config/config.json'));
 const creds = JSON.parse(open('../temp_store.json'));
@@ -9,12 +7,6 @@ const creds = JSON.parse(open('../temp_store.json'));
 export var options = {};
 const {RPS, Executor, Duration, Rate, TimeUnit, VirtualUserCount, BatchSize} = config.LoadTestConfiguration;
 const {MaxWordsCount, MaxWordLength} = config.PostsConfiguration;
-
-// Temporary code
-const shared = new SharedArray('demo array', () => {
-    // const creds = JSON.parse(open('../temp_store.json'));
-    return [0, 0];
-})
 
 if (RPS) {
     options = {
@@ -93,22 +85,6 @@ function getRandomChannel() {
     return channels[(Math.floor(Math.random() * channels.length))];
 }
 
-// Temporary code
-export function handleSummary(data) {
-    data.metrics['no_of_posts_created'] = {
-        type: 'rate',
-        contains: "default",
-        values: {
-            fails: shared[0],
-            rate: 0,
-            passes: shared[1],
-        },
-    }
-    return {
-      'stdout': textSummary(data, {indent: '    ', enableColors: true})
-    };
-}
-
 export default function() {
     const requests = [];
     for(let i = 0; i < BatchSize; i++) {
@@ -153,19 +129,17 @@ export default function() {
         }
     });
 
-    // TODO: Temporary code, fix or remove
+    let countSucc = 0, countFail = 0;
     const responses = resp.json("responses");
     if(responses) {
         for(let response of responses) {
             if(response.status === 201) {
-                shared[0] = shared[0]+1;
+                countSucc++;
             } else {
-                shared[1] = shared[1]+1;
+                countFail++;
             }
         }
     }
     
-    
-    let countSucc = shared[1], countFail = shared[0];
     console.info(`No. of posts created: ✔ ${countSucc}  ⨯ ${countFail}`);
 }
