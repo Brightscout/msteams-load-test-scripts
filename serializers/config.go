@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	ConnectionConfiguration ConnectionConfiguration
-	UsersConfiguration      []UsersConfiguration
+	UsersConfiguration      UsersConfiguration
 	ChannelsConfiguration   []ChannelsConfiguration
 }
 
@@ -19,8 +19,9 @@ type ConnectionConfiguration struct {
 }
 
 type UsersConfiguration struct {
-	Email    string
-	Password string
+	AdminEmail    string
+	AdminPassword string
+	UserPassword  string
 }
 
 type ChannelsConfiguration struct {
@@ -52,17 +53,21 @@ func (c *Config) IsConnectionConfigurationValid() error {
 }
 
 func (c *Config) IsUsersConfigurationValid() error {
-	for idx, user := range c.UsersConfiguration {
-		user.Email = strings.TrimSpace(user.Email)
-		user.Password = strings.TrimSpace(user.Password)
+	config := c.UsersConfiguration
+	config.AdminEmail = strings.TrimSpace(config.AdminEmail)
+	config.AdminPassword = strings.TrimSpace(config.AdminPassword)
+	config.UserPassword = strings.TrimSpace(config.UserPassword)
 
-		if user.Email == "" {
-			return fmt.Errorf("user email should not be empty. index: %d", idx)
-		}
+	if config.AdminEmail == "" {
+		return errors.New("admin email should not be empty.")
+	}
 
-		if user.Password == "" {
-			return fmt.Errorf("user password should not be empty. index: %d", idx)
-		}
+	if config.AdminPassword == "" {
+		return errors.New("user password should not be empty.")
+	}
+
+	if config.UserPassword == "" {
+		return errors.New("user password should not be empty.")
 	}
 
 	return nil
