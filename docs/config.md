@@ -62,3 +62,9 @@ Types of executors to apply for the request rate. Available executor is: `consta
 
 ### Rate: *int*
 Number of iterations to start during each time unit period.
+
+### BatchSize: *int*
+The size of batch used to send requests to MS Graph.
+
+## How to configure posts per second
+We are sending requests to create posts in MS Teams in batches, and the requests in batches are run in parallel. Both the request rate and the batch size are configurable. So, we can configure the post-creation rate according to our needs. For example, suppose we want 5 posts per second. We can configure the "Rate" as 1 and the "BatchSize" as 5 OR the "Rate" as 5 and the "BatchSize" as 1.
