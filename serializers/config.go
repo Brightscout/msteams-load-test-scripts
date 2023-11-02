@@ -63,7 +63,7 @@ func (c *Config) IsUsersConfigurationValid() error {
 	}
 
 	if config.AdminPassword == "" {
-		return errors.New("user password should not be empty.")
+		return errors.New("admin password should not be empty.")
 	}
 
 	if config.UserPassword == "" {
